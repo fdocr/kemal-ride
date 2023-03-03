@@ -1,8 +1,8 @@
 # kemal-ride
 
-Shard that helps structure [Kemal](https://github.com/kemalcr/kemal) projects and reduce boilerplate work required before/during/after the project's development lifespan.
+Shard that helps structure [Kemal](https://github.com/kemalcr/kemal) projects and reduce boilerplate work required before/during/after development.
 
-For the moment there's a lot of nuance and too many defaults enabled, but it's part of the process I guess. To like this you'll have to _embrace [Sinatra's](https://github.com/sinatra/sinatra) essence/simplicity_. There's no need for that to limit the potential of an app built this way, right?
+For the moment there's a lot of nuance and too many defaults enabled, but it's part of the process. To enjoy this you'll have to _embrace [Sinatra's](https://github.com/sinatra/sinatra) essence/simplicity_.
 
 > Regrets, I've had a few
 >
@@ -12,7 +12,7 @@ For the moment there's a lot of nuance and too many defaults enabled, but it's p
 
 ## Installation
 
-You'll need Crystal and Yarn installed locally and available Redis & Postgres services to start (you can always disable features you don't want/need).
+You'll need Crystal and Yarn installed locally, also Redis & Postgres services to start. You can always disable features you don't want/need.
 
 1. Initialize a new crystal app
 
