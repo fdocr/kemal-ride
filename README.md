@@ -5,7 +5,9 @@ Shard that helps structure [Kemal](https://github.com/kemalcr/kemal) projects an
 For now there's a lot of nuance and too many defaults enabled, but it's part of the process. The ethos is to _embrace Kemal & [Sinatra's](https://github.com/sinatra/sinatra) essence/simplicity_ without sacrificing maintainability as a project grows.
 
 > Regrets, I've had a few
+>
 > But then again too few to mention
+>
 > I did what I had to do
 
 ## Installation
@@ -83,6 +85,9 @@ make sam kemal:dev
 
 # Run specs
 make sam kemal:test
+
+# Jennifer.cr tasks are included. Read more about them:
+# https://imdrasil.github.io/jennifer.cr/docs/command_line
 ```
 
 ## Development
