@@ -10,9 +10,11 @@ task "webpack" do
 end
 
 Sam.namespace "kemal" do
+  # TODO: Make this portable across platforms by replacing the `cp` calls
+  # TODO: Make this configurable (opt-out to DB/telemetry/webpack/etc)
   task "ride" do |_, args|
-    # TODO: Make this portable across platforms by replacing the `cp` calls
-    # TODO: Make this configurable (opt-out to DB/telemetry/webpack/etc)
+    p "Copying files..."
+
     lib_prefix = "lib/kemal-ride/src/kemal-ride/templates"
     [
       "initializers", "mailers", "models", "routes", 
@@ -25,6 +27,7 @@ Sam.namespace "kemal" do
     File.copy("#{lib_prefix}/sam.cr", "src/sam.cr")
     File.copy("#{lib_prefix}/app.cr", "src/app.cr")
     File.copy("#{lib_prefix}/worker.cr", "src/worker.cr")
+    File.copy("#{lib_prefix}/bundle.cr", "src/bundle.cr")
     File.copy("#{lib_prefix}/sample.env", ".env")
     File.copy("#{lib_prefix}/Makefile", "Makefile")
     File.copy("#{lib_prefix}/Dockerfile", "Dockerfile")
@@ -34,16 +37,28 @@ Sam.namespace "kemal" do
 
     # Migrations
     Dir.mkdir_p("db/migrations")
+    # Static files
+    Dir.mkdir_p("public")
+    File.copy("#{lib_prefix}/public/favicon.ico", "public/favicon.ico")
 
     # Append to .gitignore
     ignore_append = <<-IGNORE
+
     # kemal-ride ignores
+    node_modules/
+    public/app.js
+    public/app.css
     .env
     app
     worker
     yarn-error.log
     IGNORE
     File.write(".gitignore", ignore_append, mode: "a")
+
+    p "Running yarn install"
+    system "yarn install"
+
+    p "Done! Start your local development with `make sam kemal:dev`"
   end
 
   task "dev" do

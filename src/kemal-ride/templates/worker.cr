@@ -1,7 +1,7 @@
 require "dotenv"
 Dotenv.load if File.exists?(".env")
 
-require "./initializers/**"
+require "./initializers/kemal"
 require "./models/**"
 require "./jobs/**"
 

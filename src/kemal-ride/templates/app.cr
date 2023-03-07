@@ -4,14 +4,13 @@ Dotenv.load if File.exists?(".env")
 require "kemal"
 require "kemal-ride"
 
-# require "./initializers/kemal.cr"
-require "./initializers/**"
+require "./initializers/kemal"
 require "./helpers/**"
-# require "./models/application_record.cr"
 require "./models/**"
-# require "../src/mailers/application_mailer.cr"
 require "./mailers/**"
 require "./jobs/**"
-require "./routes/**"
+
+# Require all routes here
+require "./routes/home"
 
 Kemal.run

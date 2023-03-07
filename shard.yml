@@ -10,9 +10,9 @@ dependencies:
   kemal-session:
     github: kemalcr/kemal-session
     version: ~> 1.0
-  # kemal-session-redis:
-  #   github: neovintage/kemal-session-redis
-  #   branch: master
+  kemal-session-redis:
+    github: fdocr/kemal-session-redis
+    branch: jgaskings-redis
   kemal-csrf:
     github: kemalcr/kemal-csrf
     version: ~> 1.0
