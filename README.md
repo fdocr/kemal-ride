@@ -2,17 +2,15 @@
 
 Shard that helps structure [Kemal](https://github.com/kemalcr/kemal) projects and reduce boilerplate work required before/during/after development.
 
-For the moment there's a lot of nuance and too many defaults enabled, but it's part of the process. To enjoy this you'll have to _embrace [Sinatra's](https://github.com/sinatra/sinatra) essence/simplicity_.
+For now there's a lot of nuance and too many defaults enabled, but it's part of the process. The ethos is to _embrace Kemal & [Sinatra's](https://github.com/sinatra/sinatra) essence/simplicity_ without sacrificing maintainability as a project grows.
 
 > Regrets, I've had a few
->
 > But then again too few to mention
->
 > I did what I had to do
 
 ## Installation
 
-You'll need Crystal and Yarn installed locally, also Redis & Postgres services to start. You can always disable features you don't want/need.
+You'll need Crystal and Yarn installed locally, also Redis & Postgres services available before you get started. You can always disable features you don't want/need.
 
 1. Initialize a new crystal app
 
@@ -59,7 +57,25 @@ You'll need Crystal and Yarn installed locally, also Redis & Postgres services t
 
 ## Usage
 
-TODO: Write usage instructions here
+At this point you have a local server that has:
+- Sensible Kemal configuration
+  - [CSRF protection](https://github.com/kemalcr/kemal-csrf)
+  - [Redis-backed sessions](https://github.com/fdocr/kemal-session-redis)
+- ORM
+  - Postgres by default using [jennifer.cr](https://github.com/imdrasil/jennifer.cr)
+- Background jobs
+  - Redis backed using [mosquito](https://github.com/mosquito-cr/mosquito)
+- Webpack support
+  - [Tailwindcss](https://tailwindcss.com/) for CSS framework
+  - [StimulusJS](https://stimulus.hotwired.dev/) for minimal JS framework
+- Email support
+  - Using [carbon](https://github.com/luckyframework/carbon)
+- OpenTelemetry support
+  - Using [jgaskins/opentelemetry](https://github.com/jgaskins/opentelemetry)
+- `view` macro
+  - Helps render views using layout convention
+- [sam.cr](https://github.com/imdrasil/sam.cr) tasks for ease of development
+  - Some of them below
 
 ```bash
 # Start local development environment
@@ -75,7 +91,7 @@ TODO: Write development instructions here
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/kemal-ride/fork>)
+1. Fork it (<https://github.com/fdocr/kemal-ride/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
@@ -83,4 +99,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [Fernando Valverde](https://github.com/your-github-user) - creator and maintainer
+- [Fernando Valverde](https://github.com/fdocr) - creator and maintainer
