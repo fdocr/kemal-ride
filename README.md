@@ -47,11 +47,8 @@ You'll need Crystal and Yarn installed locally, also Redis & Postgres services a
 5. Run the following commands to create & initialize the project structure
 
   ```crystal
-  # Create directory structure & add default files
+  # Create directory structure, add default files & yarn install
   crystal src/sam.cr kemal:ride
-
-  # Gotta yarn before starting up
-  yarn
 
   # Start your local development server
   make sam kemal:dev
