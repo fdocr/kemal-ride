@@ -38,8 +38,8 @@ Sam.namespace "kemal" do
     # Migrations
     Dir.mkdir_p("db/migrations")
     # Static files
-    Dir.mkdir_p("public")
-    File.copy("#{lib_prefix}/public/favicon.ico", "public/favicon.ico")
+    Dir.mkdir_p("public/assets")
+    File.copy("#{lib_prefix}/public/assets/favicon.ico", "public/assets/favicon.ico")
 
     # Append to .gitignore
     ignore_append = <<-IGNORE

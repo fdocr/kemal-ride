@@ -23,7 +23,7 @@ end
 # to structure a Kemal project. It leverages `imdrasil/sam.cr` shard as a task
 # runner tool to automate a few different aspects of the development experience
 module Kemal::Ride
-  VERSION = "0.1.1"
+  VERSION = "0.1.2"
 
   @@log_severity : Log::Severity? = nil
 
