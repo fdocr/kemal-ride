@@ -15,6 +15,7 @@ dependencies:
     branch: jgaskings-redis
   kemal-csrf:
     github: kemalcr/kemal-csrf
+    branch: master
   opentelemetry:
     github: fdocr/opentelemetry
     commit: f8a9f89
