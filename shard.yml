@@ -14,8 +14,8 @@ dependencies:
     github: fdocr/kemal-session-redis
     branch: jgaskings-redis
   kemal-csrf:
-    github: kemalcr/kemal-csrf
-    version: ~> 1.0
+    github: fdocr/kemal-csrf
+    branch: fix-allowed_routes
   opentelemetry:
     github: fdocr/opentelemetry
     commit: f8a9f89
