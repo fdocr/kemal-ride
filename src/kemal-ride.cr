@@ -1,14 +1,17 @@
 require "./kemal-ride/log_handler"
+require "./kemal-ride/auth"
 require "./kemal-ride/application_job"
 
-macro view(filename = nil, layout = true, path = "src/views", folder = __FILE__)
+macro view(filename = nil, layout = true, path = "", folder = __FILE__)
   {% if !filename %}
     raise "Filename required!"
   {% end %}
 
   {{ short_path = folder.gsub(/^.+?src\/routes\//, "").gsub(/\.cr$/, "") }}
 
-  {% if layout %}
+  {% if path != "" %}
+    render "src/views/#{{{path}}}.ecr", "src/views/shared/layout.ecr"
+  {% elsif layout %}
     {% if layout.class_name == "StringLiteral" %}
       render "src/views/#{{{short_path}}}/{{filename.id}}.ecr", "src/views/shared/{{layout.id}}.ecr"
     {% else %}
