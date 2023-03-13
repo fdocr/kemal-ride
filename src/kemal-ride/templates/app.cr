@@ -10,8 +10,6 @@ require "./models/**"
 require "./mailers/**"
 require "./policies/**"
 require "./jobs/**"
-
-# Require route handlers here:
-require "./handlers/root"
+require "./handlers/application_handler"
 
 Kemal.run
