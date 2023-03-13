@@ -16,10 +16,9 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@hotwired/stimulus": "^3.1.0",
+    "@hotwired/stimulus": "^3.2.1",
     "@hotwired/stimulus-webpack-helpers": "^1.0.1",
-    "@hotwired/turbo": "^7.1.0",
-    "tailwindcss": "^3.1.8"
+    "tailwindcss": "^3.2.7"
   },
   "scripts": {
     "build": "webpack -c webpack.config.js",
