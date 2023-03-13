@@ -4,7 +4,7 @@ macro auth_helpers
   property current_user : User?
 
   def current_user
-    return @current_user if @current_user_loaded
+    return @current_user unless @current_user.nil?
     @current_user = if uid = session.string?("uid")
       User.find(uid)
     end
@@ -48,7 +48,7 @@ module Kemal::Ride
   # # src/policies/home_policy.cr
   # 
   # class HomePolicy < Kemal::Ride::Policy
-  #   def dashboard!
+  #   def dashboard
   #     raise Kemal::Ride::PolicyException.new if signed_out?
   #   end
   # end
@@ -58,7 +58,7 @@ module Kemal::Ride
   # 
   # ```crystal
   # get "/dashboard" do |env|
-  #   policy! &.authorize_dashboard! do
+  #   policy! &.guard_dashboard do
   #     # policy authorization failed (raised exception)
   #     redirect_to "/"
   #     return # You must return to avoid execution outside the block
@@ -80,7 +80,7 @@ module Kemal::Ride
 
     macro inherited
       macro method_added(method)
-        def authorize_\{{ method.name.id }}
+        def guard_\{{ method.name.id }}
           begin
             \{{ method.name.id }}
           rescue Kemal::Ride::PolicyException
@@ -100,7 +100,7 @@ module Kemal::Ride
   # 
   # ```crystal
   # get "/dashboard" do |env|
-  #   authorize_authenticated! do
+  #   guard_authenticated do
   #     # policy authorization failed (raised exception)
   #     redirect_to "/"
   #     return # You must return to avoid execution outside the block

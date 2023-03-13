@@ -39,7 +39,6 @@ module Kemal::Ride
     end
   
     macro method(m)
-      # TODO: Check if `HTTP::Server::Context` type definition is needed (delete it)
       -> (env : HTTP::Server::Context) do
         self.instance(env).{{m.id}}
       end
@@ -62,16 +61,18 @@ module Kemal::Ride
       yield Kemal::Ride::AuthPolicy.new(self)
     end
 
-    def authorize_authenticated!
-      begin
-        Kemal::Ride::AuthPolicy.new(self).authenticated!
-      rescue Kemal::Ride::PolicyException
-        yield
+    macro redirect_authenticated!(path = "/")
+      if signed_in?
+        redirect_to {{ path }}
+        return
       end
     end
 
-    def authorize_unauthenticated!
-      Kemal::Ride::AuthPolicy.new(self).unauthenticated!
+    macro redirect_unauthenticated!(path = "/")
+      if signed_out?
+        redirect_to {{ path }}
+        return
+      end
     end
 
     # Misc helpers

@@ -5,3 +5,4 @@ end
 
 # Require handlers in order
 require "./home_handler"
+# require "./auth/**"             # Uncomment for auth integration

@@ -4,6 +4,6 @@
 
 @layer components {
   body {
-    @apply bg-violet-100;
+    @apply bg-slate-100;
   }
 }
