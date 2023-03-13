@@ -1,13 +1,14 @@
 require "./kemal-ride/log_handler"
 require "./kemal-ride/auth"
 require "./kemal-ride/application_job"
+require "./kemal-ride/base_handler"
 
 macro view(filename = nil, layout = true, path = "", folder = __FILE__)
   {% if !filename %}
     raise "Filename required!"
   {% end %}
 
-  {{ short_path = folder.gsub(/^.+?src\/routes\//, "").gsub(/\.cr$/, "") }}
+  {{ short_path = folder.gsub(/^.+?src\/handlers\//, "").gsub(/_handler\.cr$/, "") }}
 
   {% if path != "" %}
     render "src/views/#{{{path}}}.ecr", "src/views/shared/layout.ecr"
@@ -26,7 +27,7 @@ end
 # to structure a Kemal project. It leverages `imdrasil/sam.cr` shard as a task
 # runner tool to automate a few different aspects of the development experience
 module Kemal::Ride
-  VERSION = "0.1.2"
+  VERSION = "0.1.3"
 
   @@log_severity : Log::Severity? = nil
 

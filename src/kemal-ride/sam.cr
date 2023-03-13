@@ -17,8 +17,8 @@ Sam.namespace "kemal" do
 
     lib_prefix = "lib/kemal-ride/src/kemal-ride/templates"
     [
-      "initializers", "mailers", "models", "routes", 
-      "views", "webpack", "jobs", "helpers"
+      "initializers", "mailers", "models", "handlers", "services",
+      "views", "webpack", "jobs", "helpers", "policies"
     ].each do |dirname|
       system "cp -R #{lib_prefix}/#{dirname} src/"
     end

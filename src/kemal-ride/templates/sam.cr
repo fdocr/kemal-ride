@@ -3,10 +3,9 @@ Dotenv.load
 
 require "sam"
 require "kemal-ride"
-require "../lib/kemal-ride/src/kemal-ride/sam.cr"
-
 require "./initializers/database"
 require "../db/migrations/*"
-load_dependencies "jennifer"
+require "../lib/jennifer/src/jennifer/sam"
+require "../lib/kemal-ride/src/kemal-ride/sam"
 
 Sam.help

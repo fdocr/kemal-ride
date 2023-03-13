@@ -1,47 +1,60 @@
 # Instantiates `Kemal::Ride::AuthPolicy` policy and calls the *method* on it.
-# It will redirect to *path* if raises `Kemal::Ride::PolicyException`
-# (forbidden access).
-macro kemal_auth_policy(method, path)
+# All policies raise `Kemal::Ride::PolicyException` but you can pass in a block
+# to execute when the policy fails (forbidden access). Execution won't continue
+# after the block runs, so you can respond with a proper redirect/error message
+# 
+# 
+macro kemal_auth_policy(method)
   begin
     Kemal::Ride::AuthPolicy.new(env).{{ method.id }}
   rescue Kemal::Ride::PolicyException
-    env.redirect "{{ path.id }}"
+    yield
     next
   end
 end
 
 # Instantiates a policy *klass* and calls the *method* on it. It will redirect
 # to *path* if raises `Kemal::Ride::PolicyException` (forbidden access).
-macro kemal_policy(klass, method, path)
+macro kemal_policy(klass, method)
   begin
     {{ klass.id }}.new(env).{{ method.id }}
   rescue Kemal::Ride::PolicyException
-    env.redirect "{{ path.id }}"
+    yield
     next
   end
 end
 
-# Returns the current user of type `( User | Nil )`
-macro kemal_auth_current_user
-  Kemal::Ride::Auth.new(env).current_user
-end
+# Macro to call from `src/handlers/application_handler.cr` to use auth
+# helpers like `current_user`, `signed_in?`, etc
+macro auth_helpers
+  property current_user : User?
 
-# Returns the current user of type `User` but it will raise an exception if
-# the current user isn't available (unauthenticated session)
-macro kemal_auth_current_user!
-  Kemal::Ride::Auth.new(env).current_user!
-end
+  def current_user
+    return @current_user if @current_user_loaded
+    @current_user = if uid = session.string?("uid")
+      User.find(uid)
+    end
+  end
 
-# Persists in the current session the `user.id`, in other words "signs in" the
-# `user` (variable must be avaiable in route handler).
-macro kemal_auth_login_user!
-  Kemal::Ride::Auth.new(env).login!(user.id.as(Int64))
-end
+  def current_user!
+    User.find!(session.string("uid"))
+  end
 
-# Clears the current session, in other words "signs out" the current user
-# (if any)
-macro kemal_auth_logout_user!
-  Kemal::Ride::Auth.new(env).logout!
+  def signed_in?
+    !signed_out?
+  end
+
+  def signed_out?
+    session.string?("uid").nil?
+  end
+
+  def login!(user_id : String)
+    session.string("uid", user_id)
+  end
+
+  def logout!
+    session.destroy
+  end
 end
 
 module Kemal::Ride
@@ -54,7 +67,8 @@ module Kemal::Ride
 
   # Base Policy class for all custom policies to inherit from. From inside of
   # policy classes you have access to `Kemal::Ride::Auth` instance methods
-  # because polcies delegates to it. Example:
+  # because polcies delegates to handlers (requires `auth_helpers` on 
+  # `ApplicationHandler`). Example:
   # 
   # ```crystal
   # # src/policies/home_policy.cr
@@ -66,31 +80,62 @@ module Kemal::Ride
   # end
   # ```
   # 
-  # You can now use the available macros on routes to validate against that
-  # custo policy. The following example calls `kemal_policy` macro to execute
-  # `HomePolicy#dashboard!`. It will redirect to "/auth/login" if the policy 
-  # raises a `Kemal::Ride::PolicyException`.
+  # You can now authorize policies from handlers this way:
   # 
   # ```crystal
   # get "/dashboard" do |env|
-  #   kemal_policy(HomePolicy, :dashboard!, "/auth/login")
+  #   policy! &.authorize_dashboard! do
+  #     # policy authorization failed (raised exception)
+  #     redirect_to "/"
+  #     return # You must return to avoid execution outside the block
+  #   end
+  # 
+  #   # Policy didn't fail
   #   view(:dashboard)
   # end
   # ```
   abstract class Policy
-    delegate current_user!, to: @auth
-    delegate current_user, to: @auth
-    delegate signed_in?, to: @auth
-    delegate signed_out?, to: @auth
+    delegate current_user!, to: @handler
+    delegate current_user, to: @handler
+    delegate signed_in?, to: @handler
+    delegate signed_out?, to: @handler
 
-    def initialize(@env : HTTP::Server::Context)
-      @auth = Kemal::Ride::Auth.new(@env)
+    getter handler : Kemal::Ride::BaseHandler
+
+    def initialize(@handler); end
+
+    macro inherited
+      macro method_added(method)
+        def authorize_\{{ method.name.id }}
+          begin
+            \{{ method.name.id }}
+          rescue Kemal::Ride::PolicyException
+            yield
+          end
+        end
+      end
     end
   end
 
   # Base Authentication policy used for common scenarios, like to check if a
-  # user is signed in or not. To use this policy within route handlers it will
-  # likely be better to rely on the existing macro `kemal_auth_policy`
+  # user is signed in or not. Handlers support helper methods like
+  # `Kemal::Ride::BaseHandler#authenticated!` or
+  # `Kemal::Ride::BaseHandler#unauthenticated!`, both of which accept a block
+  # which will in turn execute when the default `#authenticated!` and 
+  # `#unauthenticated` policies fail (exception raised). Example:
+  # 
+  # ```crystal
+  # get "/dashboard" do |env|
+  #   authorize_authenticated! do
+  #     # policy authorization failed (raised exception)
+  #     redirect_to "/"
+  #     return # You must return to avoid execution outside the block
+  #   end
+  # 
+  #   # Policy didn't fail
+  #   view(:dashboard)
+  # end
+  # ```
   class AuthPolicy < Policy
     # Raises `Kemal::Ride::PolicyException` if user is signed out (isn't
     # _unauthenticated_)
@@ -102,48 +147,6 @@ module Kemal::Ride
     # _unauthenticated_)
     def unauthenticated!
       raise Kemal::Ride::PolicyException.new if signed_in?
-    end
-  end
-
-  # Main point of entry to standardize access to the user associated with the
-  # session, as well as other utility methods. Examples:
-  # 
-  # ```crystal
-  # Kemal::Ride::Auth.new(env).current_user!
-  # Kemal::Ride::Auth.new(env).login!(user.id)
-  # Kemal::Ride::Auth.new(env).logout!
-  # ```
-  # 
-  # Within route handlers it might be useful to rely on macros like 
-  # `kemal_auth_current_user`, `kemal_auth_current_user!`, 
-  # `kemal_auth_login_user!`, 
-  class Auth
-    def initialize(@env : HTTP::Server::Context); end
-
-    def current_user!
-      User.find!(@env.session.bigint("uid"))
-    end
-
-    def current_user
-      if uid = @env.session.bigint?("uid")
-        User.find!(uid)
-      end
-    end
-
-    def signed_in?
-      !signed_out?
-    end
-
-    def signed_out?
-      @env.session.bigint?("uid").nil?
-    end
-
-    def login!(user_id : Int64)
-      @env.session.bigint("uid", user_id)
-    end
-
-    def logout!
-      @env.session.destroy
     end
   end
 end
