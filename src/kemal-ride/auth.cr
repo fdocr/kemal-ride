@@ -1,29 +1,3 @@
-# Instantiates `Kemal::Ride::AuthPolicy` policy and calls the *method* on it.
-# All policies raise `Kemal::Ride::PolicyException` but you can pass in a block
-# to execute when the policy fails (forbidden access). Execution won't continue
-# after the block runs, so you can respond with a proper redirect/error message
-# 
-# 
-macro kemal_auth_policy(method)
-  begin
-    Kemal::Ride::AuthPolicy.new(env).{{ method.id }}
-  rescue Kemal::Ride::PolicyException
-    yield
-    next
-  end
-end
-
-# Instantiates a policy *klass* and calls the *method* on it. It will redirect
-# to *path* if raises `Kemal::Ride::PolicyException` (forbidden access).
-macro kemal_policy(klass, method)
-  begin
-    {{ klass.id }}.new(env).{{ method.id }}
-  rescue Kemal::Ride::PolicyException
-    yield
-    next
-  end
-end
-
 # Macro to call from `src/handlers/application_handler.cr` to use auth
 # helpers like `current_user`, `signed_in?`, etc
 macro auth_helpers
