@@ -7,6 +7,6 @@ class HomeHandler < ApplicationHandler
   
   # def index
   #   puts "Check the console..."
-  #   view(:index)
+  #   view
   # end
 end
