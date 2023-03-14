@@ -23,7 +23,7 @@ module Kemal::Ride
       {% end %}
     end
 
-    delegate :session, :params, :flash, :request, to: context
+    delegate :session, :params, :request, to: context
 
     def self.instance(env : HTTP::Server::Context)
       {% begin %}
@@ -55,10 +55,6 @@ module Kemal::Ride
       if policy = @policy
         yield policy
       end
-    end
-
-    def auth_policy!
-      yield Kemal::Ride::AuthPolicy.new(self)
     end
 
     macro redirect_authenticated!(path = "/")

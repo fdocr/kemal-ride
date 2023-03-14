@@ -40,32 +40,64 @@ module Kemal::Ride
   end
 
   # Base Policy class for all custom policies to inherit from. From inside of
-  # policy classes you have access to `Kemal::Ride::Auth` instance methods
-  # because polcies delegates to handlers (requires `auth_helpers` on 
-  # `ApplicationHandler`). Example:
+  # policy classes you have access to Handler auth helper methods because
+  # polcies delegates to handlers (requires `auth_helpers` on
+  # `ApplicationHandler`). Examples with and without a resource:
   # 
   # ```crystal
   # # src/policies/home_policy.cr
   # 
-  # class HomePolicy < Kemal::Ride::Policy
-  #   def dashboard
+  # class ChartPolicy < Kemal::Ride::Policy
+  #   def index
+  #     # Must be authenticated
   #     raise Kemal::Ride::PolicyException.new if signed_out?
+  #   end
+  #
+  #   def show(resource : Chart = nil)
+  #     # Must be authenticated
+  #     raise Kemal::Ride::PolicyException.new if signed_out?
+  #
+  #     if chart = resource
+  #       # current_user must own the chart
+  #       raise Kemal::Ride::PolicyException.new unless current_user!.id == chart.user_id
+  #     else
+  #       # Chart not found
+  #       raise Kemal::Ride::PolicyException.new
+  #     end
   #   end
   # end
   # ```
   # 
-  # You can now authorize policies from handlers this way:
+  # You can now authorize policies from handlers using the `policy!` and
+  # `guard` helper methods.
   # 
   # ```crystal
-  # get "/dashboard" do |env|
-  #   policy! &.guard_dashboard do
-  #     # policy authorization failed (raised exception)
-  #     redirect_to "/"
-  #     return # You must return to avoid execution outside the block
+  # class ChartsHandler
+  #   get "/charts", &method(:index)
+  #   get "/charts/:id", &method(:show)
+  #
+  #   def index
+  #     policy! &.guard do
+  #       # policy authorization failed (raised exception)
+  #       redirect_to "/"
+  #       return # You must return to avoid execution outside the block
+  #     end
+  #
+  #     charts = Charts.all
+  #     view
   #   end
-  # 
-  #   # Policy didn't fail
-  #   view(:dashboard)
+  #
+  #   def show
+  #     chart = Chart.find_by({ :id => params.url["id"] })
+  #     policy! &.guard(chart) do
+  #       # policy authorization failed (raised exception)
+  #       redirect_to "/"
+  #       return # You must return to avoid execution outside the block
+  #     end
+  #
+  #     # Policy didn't fail
+  #     view
+  #   end
   # end
   # ```
   abstract class Policy
@@ -87,40 +119,47 @@ module Kemal::Ride
             yield
           end
         end
+
+        def guard_\{{ method.name.id }}(resource)
+          begin
+            \{{ method.name.id }}(resource)
+          rescue Kemal::Ride::PolicyException
+            yield
+          end
+        end
       end
-    end
-  end
 
-  # Base Authentication policy used for common scenarios, like to check if a
-  # user is signed in or not. Handlers support helper methods like
-  # `Kemal::Ride::BaseHandler#authenticated!` or
-  # `Kemal::Ride::BaseHandler#unauthenticated!`, both of which accept a block
-  # which will in turn execute when the default `#authenticated!` and 
-  # `#unauthenticated` policies fail (exception raised). Example:
-  # 
-  # ```crystal
-  # get "/dashboard" do |env|
-  #   guard_authenticated do
-  #     # policy authorization failed (raised exception)
-  #     redirect_to "/"
-  #     return # You must return to avoid execution outside the block
-  #   end
-  # 
-  #   # Policy didn't fail
-  #   view(:dashboard)
-  # end
-  # ```
-  class AuthPolicy < Policy
-    # Raises `Kemal::Ride::PolicyException` if user is signed out (isn't
-    # _unauthenticated_)
-    def authenticated!
-      raise Kemal::Ride::PolicyException.new if signed_out?
-    end
+      macro finished
+        def guard(method)
+          {% begin %}
+            begin
+              case method
+              \{% for method in @type.methods.map(&.name).reject { |name| name.starts_with?("guard_") } %}
+                when :\{{ method.id }}
+                  guard_\{{ method.id }} { yield }
+              \{% end %}
+              end
+            rescue Kemal::Ride::PolicyException
+              yield
+            end
+          {% end %}
+        end
 
-    # Raises `Kemal::Ride::PolicyException` if user is signed in (isn't
-    # _unauthenticated_)
-    def unauthenticated!
-      raise Kemal::Ride::PolicyException.new if signed_in?
+        def guard(method, resource)
+          {% begin %}
+            begin
+              case method
+              \{% for method in @type.methods.map(&.name).reject { |name| name.starts_with?("guard_") } %}
+                when :\{{ method.id }}
+                  guard_\{{ method.id }}(resource) { yield }
+              \{% end %}
+              end
+            rescue Kemal::Ride::PolicyException
+              yield
+            end
+          {% end %}
+        end
+      end
     end
   end
 end
