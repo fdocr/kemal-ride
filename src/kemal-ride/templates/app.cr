@@ -8,9 +8,8 @@ require "./initializers/kemal"
 require "./helpers/**"
 require "./models/**"
 require "./mailers/**"
+require "./policies/**"
 require "./jobs/**"
-
-# Require all routes here
-require "./routes/home"
+require "./handlers/application_handler"
 
 Kemal.run

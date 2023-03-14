@@ -75,16 +75,30 @@ At this point you have a local server that has:
   - Helps render views using layout convention
 - [sam.cr](https://github.com/imdrasil/sam.cr) tasks for ease of development
   - Some of them below
+- Authentication model (User class) with handlers and views
+  - Not very customizable at the moment but a nice kickstart
+- Policy classes and helpers to enforce them from route handlers
 
 ```bash
 # Start local development environment
 make sam kemal:dev
+
+# Generate User class, `/auth/*` route handlers + views
+# Strongly recommended to make this the first migration on your project
+make sam kemal:auth
 
 # Run specs
 make sam kemal:test
 
 # Jennifer.cr tasks are included. Read more about them:
 # https://imdrasil.github.io/jennifer.cr/docs/command_line
+make sam db:drop
+make sam db:create
+make sam db:migrate
+make sam db:setup
+make sam generate:model
+make sam generate:migration
+etc...
 ```
 
 ## Development
