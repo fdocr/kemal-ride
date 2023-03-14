@@ -6,7 +6,7 @@ class Auth::ResetHandler < ApplicationHandler
   def reset
     redirect_authenticated!
     user = User.build_empty
-    view(:reset)
+    view
   end
 
   def update

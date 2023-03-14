@@ -4,11 +4,13 @@ require "./kemal-ride/application_job"
 require "./kemal-ride/base_handler"
 
 macro view(filename = nil, layout = true, path = "", folder = __FILE__)
+  {% filename = @def.name if filename.nil? && @def %}
+
   {% if !filename %}
     raise "Filename required!"
   {% end %}
 
-  {{ short_path = folder.gsub(/^.+?src\/handlers\//, "").gsub(/_handler\.cr$/, "") }}
+  {% short_path = folder.gsub(/^.+?src\/handlers\//, "").gsub(/_handler\.cr$/, "") %}
 
   {% if path != "" %}
     render "src/views/#{{{path}}}.ecr", "src/views/shared/layout.ecr"

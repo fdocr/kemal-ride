@@ -8,7 +8,7 @@ class Auth::SessionHandler < ApplicationHandler
   def new
     redirect_authenticated!
     error_message = ""
-    view(:new)
+    view
   end
 
   def create
@@ -31,7 +31,7 @@ class Auth::SessionHandler < ApplicationHandler
 
   def logout
     redirect_unauthenticated!
-    view(:logout)
+    view
   end
 
   def destroy

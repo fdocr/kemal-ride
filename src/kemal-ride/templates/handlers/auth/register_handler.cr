@@ -6,7 +6,7 @@ class Auth::RegisterHandler < ApplicationHandler
   def new
     redirect_authenticated!
     user = User.build_empty
-    view(:new)
+    view
   end
 
   def create

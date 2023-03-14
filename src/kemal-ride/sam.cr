@@ -87,6 +87,7 @@ Sam.namespace "kemal" do
     .env
     app
     worker
+    bundle
     yarn-error.log
     IGNORE
     File.write(".gitignore", ignore_append, mode: "a")
@@ -135,43 +136,48 @@ Sam.namespace "kemal" do
   end
 
   task "dev" do
-    sentry = [] of Sentry::ProcessRunner
+    build_command = "crystal build ./src/app.cr"
+    run_command = ""
+
     if Dir.new("src/webpack").children.size > 0
       # There's stuff in `src/webpack/` dir
       app_env = "NODE_ENV=#{ENV["KEMAL_ENV"]? || "development"}"
-      sentry << Sentry::ProcessRunner.new(
-        display_name: "Webpack",
-        build_command: "#{app_env} yarn run build && #{app_env} yarn run build:css && crystal build ./src/app.cr",
-        run_command: "./app",
-        files: [ "./src/**/*" ]
-      )
-    else
-      sentry << Sentry::ProcessRunner.new(
-        display_name: "App",
-        build_command: "crystal build ./src/app.cr",
-        run_command: "./app",
-        run_args: ["-p", "8080"],
-        files: [ "./src/**/*" ]
-      )
+      build_command = <<-BUILD
+        #{app_env} yarn run build &&
+        #{app_env} yarn run build:css &&
+        crystal build ./src/app.cr
+        BUILD
     end
 
     if File.exists?("./src/worker.cr")
-      sentry << Sentry::ProcessRunner.new(
-        display_name: "Worker",
-        build_command: "crystal build ./src/worker.cr",
-        run_command: "./worker",
-        files: [ "./src/**/*" ]
-      )
+      # Compile bundle once (doesn't need to re-compile each time)
+      # system "crystal build ./src/bundle.cr"
+
+      # Modify run/build command
+      run_command = "./bundle"
+      if build_command.empty?
+        build_command = <<-BUILD
+          crystal build ./src/app.cr
+          crystal build ./src/worker.cr
+          crystal build ./src/bundle.cr
+          BUILD
+      else
+        build_command = <<-BUILD
+          #{build_command}
+          crystal build ./src/worker.cr
+          crystal build ./src/bundle.cr
+          BUILD
+      end
     end
 
-    # Execute runners in separate threads
-    sentry.each { |s| spawn { s.run } }
+    run_command = "./app" if run_command.blank?
 
-    begin
-      sleep
-    rescue
-      sentry.each(&.kill)
-    end
+    Sentry::ProcessRunner.new(
+      display_name: "Kemal::Ride",
+      build_command: build_command,
+      run_command: run_command,
+      files: [ "./src/**/*" ]
+    ).run
   end
 
   task "test" do
