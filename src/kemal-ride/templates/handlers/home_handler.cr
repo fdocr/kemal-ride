@@ -1,6 +1,6 @@
 class HomeHandler < ApplicationHandler
   # Render view
-  get "/", &render(:index)
+  get "/", &render_view(:index)
 
   # Execute method
   # get "/", &method(:index)

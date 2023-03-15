@@ -59,11 +59,15 @@ module Kemal::Ride
       end
     end
 
-    macro render(m)
+    macro render_view(m)
       -> (env : HTTP::Server::Context) do
         self.instance(env)
         view(:{{m.id}})
       end
+    end
+
+    macro render_partial(partial)
+      render "src/views/{{partial.id}}.ecr"
     end
 
     def policy!
