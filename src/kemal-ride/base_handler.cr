@@ -3,6 +3,12 @@ class HTTP::Server::Context
 end
 
 module Kemal::Ride
+  class Halt < Exception
+    def initialize
+      @message = "Halt"
+    end
+  end
+
   abstract class BaseHandler
     macro inherited
       setup_policy
@@ -44,6 +50,15 @@ module Kemal::Ride
       end
     end
 
+    macro method(*hooks)
+      -> (env : HTTP::Server::Context) do
+        handler = self.instance(env)
+        {% for hook in hooks %}
+          handler.{{hook.id}}
+        {% end %}
+      end
+    end
+
     macro render(m)
       -> (env : HTTP::Server::Context) do
         self.instance(env)
@@ -64,7 +79,7 @@ module Kemal::Ride
       end
     end
 
-    macro redirect_unauthenticated!(path = "/")
+    macro redirect_unauthenticated!(path = "/auth/login")
       if signed_out?
         redirect_to {{ path }}
         return
@@ -81,7 +96,7 @@ module Kemal::Ride
     end
 
     private def t(key, *args, **opts)
-      I18n.translate("#{self.class.to_s.underscore}.#{key}", *args, **opts)
+      I18n.translate(key, *args, **opts)
     end
   end  
 end

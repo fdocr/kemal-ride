@@ -129,6 +129,7 @@ Sam.namespace "kemal" do
         - `src/sam.cr` uncomment DB related lines
         
         Great! You can now:
+        - Check the user migration in `db/migrations/` to fit your needs (match `user.cr` mapping)
         - Create DB & run migrations `make sam db:setup`
         - Continue your way with `make sam kemal:dev`
       NEXT_STEPS
